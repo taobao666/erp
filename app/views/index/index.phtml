@@ -1,0 +1,40 @@
+
+
+<table id='result_table' class="table table-condensed table-bordered table-hover">
+    <colgroup>
+        <col align='left' style="width: 300px;"/>
+        <col align='right' style="width: 300px;"/>
+        <col align='right' />
+        <col align='right' />
+        <col align='right' />
+        <col align='right' />
+        <col align='right' />
+        <col align='right' style="width: 200px;"/>
+    </colgroup>
+    <tr id='header_row' class="text-center success" style="font-weight: bold;font-size: 14px;">
+        <td>编号</td>
+        <td>名称</td>
+        <td>总计</td>
+        <td>通过</td>
+        <td>失败</td>
+        <td>错误</td>
+        <td>测试时间</td>
+        <td>详细</td>
+    </tr>
+    <?php
+        if (is_array($listArr) && !empty($listArr)) {
+            foreach ($listArr as $value) {
+    ?>
+
+    <tr class='failClass warning'>
+        <td class="text-center"><?php echo $value['id'];?></td>
+        <td class="text-center"> <?php echo $value['name'];?> </td>
+        <td class="text-center"><?php echo $value['passNum']+$value['failNum']+$value['errorNum'];?></td>
+        <td class="text-center"><?php echo $value['passNum'];?></td>
+        <td class="text-center"><?php echo $value['failNum'];?></td>
+        <td class="text-center"><?php echo $value['errorNum'];?></td>
+        <td class="text-center"><?php echo date('Y-m-d H:i:s', $value['addTime']);?></td>
+        <td class="text-center"><a href="/index/detail?id=<?php echo $value['id'];?>" class="detail" id='c1' target="_blank">详细</a></td>
+    </tr>
+    <?php }} ?>
+</table>

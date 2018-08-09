@@ -1,0 +1,453 @@
+<div class='pic_looper'></div> <div class='pic_show'><div class='pic_box'><img src=''/></div> </div>
+<div class='heading'>
+    <div style="width: 650px; float: left;">
+        <h1 style="font-family: Microsoft YaHei">自动化测试报告</h1>
+<!--        <p class='attribute'><strong>测试人员 : </strong> lxh</p>-->
+        <p class='attribute'>
+            <strong>开始时间 : </strong>
+            <?php echo date('Y-m-d H:i:s', $info['addTime']);?>
+        </p>
+        <p class='attribute'>
+            <strong>合计耗时 : </strong>
+            <?php echo $totalTime;?>秒
+        </p>
+        <p class='attribute'>
+            <strong>测试结果 : </strong>
+            共
+            <?php
+                $allNum = $info['passNum']+$info['failNum']+$info['errorNum'];
+                echo $allNum;
+            ?>，
+            通过 <?php echo $info['passNum'];?>，
+            失败 <?php echo $info['failNum'];?>，
+            通过率 =
+            <?php
+            $passRate = 0;
+            if($allNum>0)
+                $passRate = sprintf("%.2f", $info['passNum']*100/$allNum);
+            else
+                if($info['passNum']>0)
+                    $passRate = 100;
+                else
+                    $passRate = 0;
+            echo $passRate;
+            ?>%
+        </p>
+        <p class='attribute'>
+            <strong>失败用例合集 : </strong>
+        </p>
+        <p class='attribute'><strong>错误用例合集 : </strong>
+        </p>
+
+        <p class='description'>测试报告</p>
+    </div>
+    <div id="container"></div>
+</div>
+
+
+
+<div style="width: 500px; clear: both;">
+    <p id='show_detail_line'>
+        <a class="btn btn-primary" href='javascript:showCase(0)'>概要{ <?php echo $passRate;?>% }</a>
+        <a class="btn btn-success" href='javascript:showCase(2)'>通过{ <?php echo $info['passNum'];?> }</a>
+        <a class="btn btn-danger" href='javascript:showCase(1)'>失败{ <?php echo $info['failNum'];?> }</a>
+        <a class="btn btn-warning" href='javascript:showCase(3)'>错误{ <?php echo $info['errorNum'];?> }</a>
+        <a class="btn btn-info" href='javascript:showCase(4)'>所有{ <?php echo $allNum;?> }</a>
+    </p>
+</div>
+<table id='result_table' class="table table-condensed table-bordered table-hover">
+    <colgroup>
+        <col align='left' style="width: 300px;"/>
+        <col align='right' style="width: 300px;"/>
+        <col align='right' />
+        <col align='right' />
+        <col align='right' />
+        <col align='right' />
+        <col align='right' />
+        <col align='right' style="width: 200px;"/>
+    </colgroup>
+    <tr id='header_row' class="text-center success" style="font-weight: bold;font-size: 14px;">
+        <td>用例集/测试用例</td>
+        <td>说明</td>
+        <td>总计</td>
+        <td>通过</td>
+        <td>失败</td>
+        <td>错误</td>
+        <td>耗时</td>
+        <td>详细</td>
+    </tr>
+    <?php
+        if(is_array($detail) && !empty($detail)) {
+            $n = 1;
+            $key = 1;
+            foreach ($detail as $value) {
+                $id = "c{$n}";
+    ?>
+    <tr class='failClass warning'>
+        <td><?php echo $value['clsName'];?></td>
+        <td> <?php echo $value['clsDesc'];?> </td>
+        <td class="text-center"><?php echo $value['total'];?></td>
+        <td class="text-center"><?php echo $value['passNum'];?></td>
+        <td class="text-center"><?php echo $value['failNum'];?></td>
+        <td class="text-center"><?php echo $value['errorNum'];?></td>
+        <td class="text-center"><?php echo $value['spendTime'];?>秒</td>
+        <td class="text-center"><a href="javascript:showClassDetail('<?php echo $id;?>',<?php echo $value['total'];?>)" class="detail" id='<?php echo $id;?>'>详细</a></td>
+    </tr>
+    <?php
+        if(is_array($value['list']) && !empty($value['list'])){
+            $ln = 1;
+            foreach ($value['list'] as $v) {
+                $lid = '';
+                $lcls = '';
+                $tcls = '';
+                if ($v['type']==0) {
+                    $lid = "pt{$key}_{$ln}";
+                    $lcls = "hiddenRow";
+                    $tcls = "passCase";
+                } elseif($v['type']==1) {
+                    $lid = "ft{$key}_{$ln}";
+                    $lcls = "none";
+                    $tcls = "failCase";
+                } elseif($v['type']==2) {
+                    $lid = "et{$key}_{$ln}";
+                    $lcls = "none";
+                    $tcls = "errorClass";
+                }
+    ?>
+
+    <tr id="<?php echo $lid;?>" class='<?php echo $lcls;?>'>
+        <td class='<?php echo $tcls;?>' style="vertical-align: middle"><div class='testcase'><?php echo $v['funName'];?></div></td>
+        <td style="vertical-align:left"><?php echo $v['funDesc'];?></td>
+        <td colspan='5' align='center'>
+            <?php if($v['type']==0) {?>
+<!--            <span class="label label-success success">通过</span>-->
+            <button id='btn_<?php echo $lid;?>' type="button"  class="btn btn-xs btn-success" data-toggle="collapse" data-target='#div_<?php echo $lid;?>'>通过</button>
+            <div id='div_<?php echo $lid;?>' class="collapse in">
+                <pre style="text-align:left">
+                    <?php
+                        $str = $v['output'];
+                        $str = preg_replace('/errorImg(.*?)errorImg, browser(.*?)browser/', '', $str);
+                        $str = preg_replace('/errorImg2(.*?)errorImg2, browser2(.*?)browser2/', '', $str);
+                        echo $str;
+                    ?>
+                </pre>
+            </div>
+            <?php }elseif($v['type']==1){?>
+            <button id='btn_<?php echo $lid;?>' type="button"  class="btn btn-xs" data-toggle="collapse" data-target='#div_<?php echo $lid;?>'>失败</button>
+            <div id='div_<?php echo $lid;?>' class="collapse in">
+                <pre style="text-align:left">
+                    <?php echo $v['failErrorOutput'];?>
+                </pre>
+            </div>
+            <?php }elseif($v['type']==2){ ?>
+            <button id='btn_<?php echo $lid;?>' type="button"  class="btn btn-xs" data-toggle="collapse" data-target='#div_<?php echo $lid;?>,#div_<?php echo $lid;?>_screenshot'>错误</button>
+            <div id='div_<?php echo $lid;?>' class="collapse in">
+                <pre style="text-align:left">
+                    <?php echo $v['failErrorOutput'];?>
+                </pre>
+            </div>
+            <?php } ?>
+        </td>
+
+        <td class='<?php echo $tcls;?>' style="vertical-align: middle">
+            <div id='div_<?php echo $lid;?>_screenshot' class="collapse in">
+                <?php
+                    if (!empty($v['output']) && (strpos($v['output'], 'errorImg2'))) {
+                        preg_match('/errorImg2\[(.*?)\]errorImg2, browser2\[(.*?)\]browser2/', $v['output'], $match);
+                        $img = substr($match[1] , strrpos($match[1], '/')+1);
+                        $browser = $match[2];
+                        $imgPath = '';
+                        if (isset($match[1])) {
+                            $imgPath = DOMAIN . 'upload' . $match[1];
+                        }
+                ?>
+                浏览器版本：<div style="color: brown;"><?php echo $browser;?></div></br>
+                截图：</br>
+                <a class="screenshot" href="javascript:void(0)" img="<?php echo $imgPath;?>">img_<?php echo $img;?></a>
+                <?php } else {
+//                    echo htmlspecialchars($v['outputs']);
+                    } ?>
+            </div>
+        </td>
+    </tr>
+    <?php  $ln++;} } ?>
+    <?php $n++;$key++;} } ?>
+
+    <tr id='total_row' class="text-center active">
+        <td colspan='2'>总计</td>
+        <td><?php echo $allNum;?></td>
+        <td><?php echo $info['passNum'];?></td>
+        <td><?php echo $info['failNum'];?></td>
+        <td><?php echo $info['errorNum'];?></td>
+        <td><?php echo $totalTime;?>秒</td>
+        <td>通过率：<?php echo $passRate;?>%</td>
+    </tr>
+</table>
+
+
+<script language="javascript" type="text/javascript">
+
+    $(function(){
+        // 修改 失败 和 错误 用例里对应按钮的颜色ClassName为动态加载 -- Gelomen
+        $("button").each(function () {
+            var text = $(this).text();
+            if(text == "失败"){
+                $(this).addClass("btn-danger")
+            }else if(text == "错误") {
+                $(this).addClass("btn-warning")
+            }
+        });
+
+        // 给失败和错误合集加样式 -- Gelomen
+        var p_attribute = $("p.attribute");
+        p_attribute.eq(4).addClass("failCollection");
+        p_attribute.eq(5).addClass("errorCollection");
+
+        // 打开截图，放大，点击任何位置可以关闭图片  -- Gelomen
+        $(".screenshot").click(function(){
+            var img = $(this).attr("img");
+            $('.pic_show img').attr('src', img);
+            $('.pic_looper').fadeIn(200);
+            $('.pic_show').fadeIn(200);
+
+            var browserHeight = $(window).height();
+            var pic_boxHeight = $(".pic_box").height();
+            var top = (browserHeight - pic_boxHeight)/2;
+            $('.pic_box').css("margin-top", top + "px")
+
+        });
+        $('.pic_looper, .pic_show').click(function(){
+            $('.pic_looper').fadeOut(200);
+            $('.pic_show').fadeOut(200)
+        });
+
+        var browserWidth = $(window).width();
+        var margin_left = browserWidth/2 - 450;
+        if(margin_left <= 240){
+            $("#container").css("margin", "auto");
+        }else {
+            $("#container").css("margin-left", margin_left + "px");
+        }
+
+        $(window).resize(function(){
+            // 改变窗口大小时，自动改变图片与顶部的距离  -- Gelomen
+            var browserHeight = $(window).height();
+            var pic_boxHeight = $(".pic_box").height();
+            var top = (browserHeight - pic_boxHeight)/2;
+            $('.pic_box').css("margin-top", top + "px");
+
+
+            // 改变窗口大小时，自动改变饼图的边距  -- Gelomen
+            var browserWidth = $(window).width();
+            var margin_left = browserWidth/2 - 450;
+            if(margin_left <= 240){
+                $("#container").css("margin", "auto");
+            }else {
+                $("#container").css("margin-left", margin_left + "px");
+            }
+        });
+
+        // 距离顶部超过浏览器窗口一屏时，回到顶部按钮才出现  -- Gelomen
+        $(window).scroll(function(){
+            var browserHeight = $(window).height();
+            var top = $(window).scrollTop();
+            if(top >= browserHeight){
+                $("#toTop").css("display", "block")
+            }else {
+                $("#toTop").css("display", "none")
+            }
+        })
+
+        // 增加回到顶部过程的动画，以看上去不会那么生硬  -- Gelomen
+        $("#toTop").click(function() {
+            $("html,body").animate({"scrollTop":0}, 700)
+        })
+
+        // 增加饼状图  -- Gelomen
+        $('#container').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                spacing : [0, 0, 0, 0]
+            },
+            credits: {
+                enabled: false
+            },
+            navigation: {
+                buttonOptions: {
+                    enabled: false
+                }
+            },
+            title: {
+                floating:true,
+                text: '测试结果占比'
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    colors: ['#81ca9d', '#f16d7e', '#fdc68c'],
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    },
+                    point: {
+                        events: {
+                            mouseOver: function(e) {  // 鼠标滑过时动态更新标题
+                                chart.setTitle({
+                                    text: e.target.name+ '\t'+ e.target.y + ' 个'
+                                });
+                            }
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                innerSize: '80%',
+                name: '比例',
+                data: [
+                    ['通过', <?php echo $info['passNum'];?>],
+                    {
+                        name: '失败',
+                        y: <?php echo $info['failNum'];?>,
+                        sliced: true,
+                        selected: true
+                    },
+                    ['错误', <?php echo $info['errorNum'];?>]
+                ]
+            }]
+        }, function(c) {
+            // 环形图圆心
+            var centerY = c.series[0].center[1],
+                titleHeight = parseInt(c.title.styles.fontSize);
+            c.setTitle({
+                y:centerY + titleHeight/2
+            });
+            chart = c;
+        });
+
+        // 查看 失败 和 错误 合集链接文字切换  -- Gelomen
+        $(".showDetail").click(function () {
+            if($(this).html() == "点击查看"){
+                $(this).html("点击收起")
+            }else {
+                $(this).html("点击查看")
+            }
+        })
+    });
+
+
+    output_list = Array();
+
+    /*level 调整增加只显示通过用例的分类 --Findyou / 修复筛选显示bug --Gelomen
+     0:Summary //all hiddenRow
+     1:Failed  //pt&et hiddenRow, ft none
+     2:Pass    //pt none, ft&et hiddenRow
+     3:Error   //pt&ft hiddenRow, et none
+     4:All     //all none
+     */
+    function showCase(level) {
+        trs = document.getElementsByTagName("tr");
+        for (var i = 0; i < trs.length; i++) {
+            tr = trs[i];
+            id = tr.id;
+            if (id.substr(0,2) == 'ft') {
+                if (level == 2 || level == 0 || level == 3) {
+                    tr.className = 'hiddenRow';
+                }
+                else {
+                    tr.className = '';
+                    // 切换筛选时只显示预览   -- Gelomen
+                    $("div[id^='div_ft']").attr("class", "collapse");
+                    $("div[id^='div_et']").attr("class", "collapse");
+                }
+            }
+            if (id.substr(0,2) == 'pt') {
+                if (level == 1 || level == 0 || level == 3) {
+                    tr.className = 'hiddenRow';
+                }
+                else {
+                    tr.className = '';
+                    // 切换筛选时只显示预览   -- Gelomen
+                    $("div[id^='div_ft']").attr("class", "collapse");
+                    $("div[id^='div_et']").attr("class", "collapse");
+                }
+            }
+            if (id.substr(0,2) == 'et') {
+                if (level == 1 || level == 0 || level == 2) {
+                    tr.className = 'hiddenRow';
+                }
+                else {
+                    tr.className = '';
+                    // 切换筛选时只显示预览   -- Gelomen
+                    $("div[id^='div_ft']").attr("class", "collapse");
+                    $("div[id^='div_et']").attr("class", "collapse");
+                }
+            }
+        }
+
+        //加入【详细】切换文字变化 --Findyou
+        detail_class=document.getElementsByClassName('detail');
+        //console.log(detail_class.length)
+        if (level == 3) {
+            for (var i = 0; i < detail_class.length; i++){
+                detail_class[i].innerHTML="收起"
+            }
+        }
+        else{
+            for (var i = 0; i < detail_class.length; i++){
+                detail_class[i].innerHTML="详细"
+            }
+        }
+    }
+
+    function showClassDetail(cid, count) {
+        var id_list = Array(count);
+        var toHide = 1;
+        for (var i = 0; i < count; i++) {
+            //ID修改 点 为 下划线 -Findyou
+            tid0 = 't' + cid.substr(1) + '_' + (i+1);
+            tid = 'f' + tid0;
+            tr = document.getElementById(tid);
+            if (!tr) {
+                tid = 'p' + tid0;
+                tr = document.getElementById(tid);
+                if (!tr) {
+                    tid = 'e' + tid0;
+                    tr = document.getElementById(tid);
+                }
+            }
+            id_list[i] = tid;
+            if (tr.className) {
+                toHide = 0;
+            }
+        }
+        for (var i = 0; i < count; i++) {
+            tid = id_list[i];
+            //修改点击无法收起的BUG，加入【详细】切换文字变化 --Findyou
+            if (toHide) {
+                document.getElementById(tid).className = 'hiddenRow';
+                document.getElementById(cid).innerText = "详细"
+            }
+            else {
+                document.getElementById(tid).className = '';
+                document.getElementById(cid).innerText = "收起"
+            }
+        }
+    }
+
+    function html_escape(s) {
+        s = s.replace(/&/g,'&amp;');
+        s = s.replace(/</g,'&lt;');
+        s = s.replace(/>/g,'&gt;');
+        return s;
+    }
+</script>
