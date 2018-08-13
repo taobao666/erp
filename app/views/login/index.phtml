@@ -1,0 +1,24 @@
+<div class="container">
+    <div class="row" style="margin-top: 100px;">
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+            <form class="form-signin" action="" method="post">
+
+                <label>登录名称：</label>
+                <input type="input" id="inputName" class="form-control" name="name" placeholder="可填写登录用户名或手机号进行登录" required autofocus>
+                <br />
+                <label>登录密码：</label>
+                <input type="password" id="inputPassword" class="form-control" name="passwd" placeholder="请填写登录密码（16位字母+数字组合）" required>
+                <br />
+                <?php if(!empty($errMsg)) { ?>
+                <label class="error" style="color: red;"><?php echo $errMsg;?></label><br />
+                <?php } ?>
+                <label>注：忘记密码请联系系统管理员找回</label>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+</div>

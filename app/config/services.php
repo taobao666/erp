@@ -70,17 +70,23 @@ $di->set('collectionManager', function () {
     return new Phalcon\Mvc\Collection\Manager();
 });
 
+
 $di->set('cookies', function () {
     $cookies = new Phalcon\Http\Response\Cookies();
     $cookies->useEncryption(true);
     return $cookies;
 }, true);
 
-if (!isset($envConfig->sdk->path)) {
-    throw new \Exception("sdk path must be set");
-}
-$path = $envConfig->sdk->path;
-if (!file_exists($path)) {
-    throw new \Exception("sdk file can not be loaded");
-}
+$di->set('crypt', function (){
+    $crypt = new Phalcon\Crypt();
+    $crypt->setKey('Gda?234don9*22');
+    return $crypt;
+});
+
+$router = new Phalcon\Mvc\Router();
+$router->handle();
+$di->set('route', function () use ($router, $di) {
+    return $router;
+}, true);
+
 include_once($path);

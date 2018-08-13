@@ -1,6 +1,6 @@
 <?php
 
-class ReportList extends \Phalcon\Mvc\Model
+class User extends \Phalcon\Mvc\Model
 {
     public function initialize()
     {
@@ -9,6 +9,6 @@ class ReportList extends \Phalcon\Mvc\Model
 
     public function getSource()
     {
-        return "report_list";
+        return "user";
     }
 }

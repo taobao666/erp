@@ -12,6 +12,7 @@ return new \Phalcon\Config(array(
         'username'    => $envConfig->db->username,
         'password'    => $envConfig->db->password,
         'dbname'      => $envConfig->db->database,
+        'charset'     => 'utf8mb4',
     ),
     'application' => array(
         'controllersDir' => __DIR__ . '/../../app/controllers/',
